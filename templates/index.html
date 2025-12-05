@@ -1,0 +1,60 @@
+    <html>
+<head>
+    <title>Decide</title>
+    
+    <style>
+
+
+body {
+    font-family: Arial;
+    padding: 0px;
+    margin: 0px;
+    font-size: 9pt;
+    background-color: #F5F5F5;
+    text-align: center;
+}
+
+
+        
+    </style>
+    
+    <script type="text/javascript" charset="utf-8">
+       
+      function datasetChange() {
+        document.getElementById('datasetname').value = document.getElementById('dataset').value;
+
+      }
+
+      function openDataset(that) {
+        console.log(that.value);
+       document.getElementById("datasetname").value = that.value;
+       //document.querySelector("form").submit();
+        const url = `/load/${encodeURIComponent(that.value)}`;
+        window.open(url, '_blank');
+}
+
+      function handleFormSubmit(event) {
+        event.preventDefault(); // Prevent the default form submission
+        const datasetname = document.getElementById("datasetname").value;
+        if (datasetname == "") { 
+            alert("You have to choose one dataset");
+            return;
+        }
+        const url = `/load/${encodeURIComponent(datasetname)}`;
+        window.open(url, '_blank');
+    }
+
+    </script>
+</head>
+<body>
+    <form onsubmit="handleFormSubmit(event)">
+    <label for="dataset">Choose a dataset:</label><br>
+    <select name="dataset" id="dataset" size="10" onclick="datasetChange()" >
+        {{ list_string | safe }}
+    </select><br>
+    <input type="hidden" id="datasetname" name="datasetname" ><br>
+    <input type="submit" value="Submit" />
+</form>
+</body>
+</html>
+

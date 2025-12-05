@@ -1,0 +1,565 @@
+    <html>
+<head>
+    <title>Decide</title>
+    
+    <style>
+
+
+body {
+    font-family: Arial;
+    padding: 0px;
+    margin: 0px;
+    font-size: 16pt;
+    background-color: #F5F5F5;
+ 
+}
+
+
+.maintable {
+    width: min-content;
+    /*border-collapse: collapse;*/
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid #A9A9A9;
+}
+
+th {
+    position: sticky;
+    top: 0; 
+    z-index: 5;
+    background-color :#e1e1e1;
+
+    vertical-align: top;
+    font: 12pt Arial;
+    font-weight: 100;
+    padding: 5px 3px;
+    border-top: 1px solid #A9A9A9;
+    border-bottom: 1px solid #A9A9A9;
+    border-right: 1px solid #A9A9A9;
+}
+
+
+.sortableHeader {
+    cursor: pointer;
+ 
+}
+
+td
+{
+    text-align: center;
+    padding: 0px 5px;
+    font: 12pt Arial;
+    min-width: 45px;
+    max-width: 275px;
+    user-select: all;
+    background-color: #F5F5F5;
+    border-bottom: 1px solid #A9A9A9;
+    border-right: 1px solid #A9A9A9;
+
+}
+
+table th:first-child,
+table td:first-child {
+  border-left: 1px solid #A9A9A9;
+}
+
+
+.stickySelect {
+    
+    min-width: 50px;
+    height:100px;
+    position: sticky;
+    left: 4px; 
+    z-index: 3;
+    background-color: white;
+    border-right: 0;
+}
+
+.observable {
+    height:100px;
+}
+
+
+.stickyHeaderIndex {
+    position: sticky;
+    left: 1px; 
+    top: 0px;
+    z-index: 20;
+    cursor: pointer;
+}
+
+.stickyHeaderMolecule {
+    position: sticky;
+    left: 56px; 
+    top: 0px;
+    z-index: 20;
+}
+
+.stickyHeaderName {
+    position: sticky;
+    left: 258px; 
+    top: 0px;
+    z-index: 20;
+}
+
+.stickyIndex {
+    min-width: 52px; 
+    height:100px;
+    position: sticky;
+    left: 1px; 
+    background-color:rgb(245, 245, 245);
+    z-index: 5;
+     
+}
+
+.stickyMolecule {
+    position: sticky;
+    left: 56px; 
+    z-index: 4;
+    background-color: #F5F5F5;
+    border-left: 0;
+}
+
+.stickyName {
+    position: sticky;
+    left: 258px; 
+    z-index: 4;
+    background-color: #F5F5F5;
+    border-left: 0;
+}
+
+.pBP80
+{  font-size: 16pt;
+    min-width: 75px; 
+    height:100%;
+    /*display: inline-grid;*/
+  align-items: center;
+  align-content: center;
+  cursor: pointer;
+}
+
+.smiles {
+    //text-overflow: ellipsis;
+    //white-space: nowrap;
+    //user-select: all;
+    //overflow: hidden;
+    min-width: 200px; 
+    word-break: break-all;
+
+}
+
+.corner-menu-trigger {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Le menu contextuel */
+.corner-context-menu {
+  position: fixed;
+  top: 40px;   /* quelques pixels sous le bouton */
+  left: 10px;
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: none;           /* caché par défaut */
+  z-index: 1000;
+  min-width: 170px;
+}
+
+.corner-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.corner-context-menu button:hover {
+  background: #f0f0f0;
+}
+
+
+        
+    </style>
+    
+    <script type="text/javascript" charset="utf-8">
+       
+       function readRowTableAjax(index) {
+        //console.log('Loading row ' + index);
+        let xmlhttp= window.XMLHttpRequest ?        new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState === 4){
+                if (  this.status === 200){
+                    //document.body.style.cursor = 'default';
+                    // update tr from response 
+                    //console.log('Row ' + index + "getted");
+                    //document.getElementById(index).parentElement.innerHTML = this.responseText;
+                    //document.getElementById(index).parentElement.insertAdjacentHTML("afterbegin",this.responseText);
+                    document.getElementById(index).insertAdjacentHTML("afterbegin",this.responseText);
+
+
+                    }
+                /*else if (  this.status === 204){
+                    document.body.style.cursor = 'default';
+                    submitFormAjax();
+                    }*/
+                else
+                {
+                    template = document.createElement('template');
+                    template.innerHTML = this.responseText.trim();
+                    document.getElementById('read_iframe').innerHTML = "<h2>Error</h2>" + template.content.lastChild.textContent.replace(/\n/g,'<br>');
+                }
+            }
+        }
+        xmlhttp.open("POST","/readrow/",true);
+        xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        //let length = document.getElementById('numrow').innerHTML;
+        xmlhttp.send("session=" + session + "&index=" + index ); 
+        //document.body.style.cursor = 'wait';
+        
+}
+
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(({ target, isIntersecting }) => {
+	if ( isIntersecting ) {
+		var index = target.getAttribute("id"); 
+        readRowTableAjax(index);
+		observer.unobserve(target);
+	}
+  });
+});
+
+function startToObserve(){
+    document.querySelectorAll(".observable").forEach(elem => observer.observe(elem));
+}
+
+function showSmiles(el) {
+    document.getElementById("modalSmiles").textContent = el.getAttribute("data-full");
+    document.getElementById("smilesModal").style.display = "block";
+}
+
+
+function toggleContextMenu(event) {
+  event.stopPropagation(); 
+  const menu = document.getElementById("cornerContextMenu");
+  const isVisible = menu.style.display === "block";
+  menu.style.display = isVisible ? "none" : "block";
+}
+
+document.addEventListener("click", function() {
+  const menu = document.getElementById("cornerContextMenu");
+  if (menu) {
+    menu.style.display = "none";
+  }
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    const menu = document.getElementById("cornerContextMenu");
+    if (menu) {
+      menu.style.display = "none";
+    }
+  }
+});
+
+
+const session =  "{{ uid }}";
+const filename = "{{ filename }}";
+
+async function onExport() {
+    let filename_input = prompt("Name of the file for the export :", filename);
+    if (filename_input === null) {
+        return;
+    }
+        if (!filename_input.toLowerCase().endsWith(".csv")) {
+        filename_input += ".csv";
+    }
+    const params = new URLSearchParams();
+    params.append("session", session);
+    params.append("filename", filename_input);
+    const response = await fetch("/export_data", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString()
+    });
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+}
+
+async function onAddMolecule() {
+  let smiles = prompt("Enter a SMILES for the new moecule :");
+  if (smiles === null) {
+    return;
+  }
+  smiles = smiles.trim();
+  if (!smiles) {
+    alert("SMILES empty, cancel");
+    return;
+  }
+  const response = await fetch("/add_molecule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      session: session,
+      filename: filename,
+      smiles: smiles,
+    }),
+  });
+  if (!response.ok) {
+    console.error("Error add_molecule :", response.statusText);
+    alert("Something wrong happens. No molecule added");
+    return;
+  }
+
+  const data = await response.json();
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  } else {
+    // fallback : recharger la page
+    window.location.reload();
+  }
+}
+
+async function onRemoveMolecule() {
+  let id = prompt("Enter the id of the molecule to remove :");
+  if (id === null) {
+    return;
+  }
+  id = id.trim();
+  if (!id) {
+    alert("id empty, cancel");
+    return;
+  }
+  const response = await fetch("/remove_molecule", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      session: session,
+      filename: filename,
+      id: id,
+    }),
+  });
+  if (!response.ok) {
+    console.error("Error remove_molecule :", response.statusText);
+    alert("Something wrong happens. No molecule removed");
+    return;
+  }
+
+  const data = await response.json();
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  } else {
+    window.location.reload();
+  }
+}
+
+async function onAddColumn() {
+  let column_name = prompt("Enter a name for the new column :");
+  if (column_name === null) {
+    return;
+  }
+  column_name = column_name.trim();
+  if (!column_name) {
+    alert("column_name empty, cancel");
+    return;
+  }
+  const response = await fetch("/add_column", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      session: session,
+      filename: filename,
+      column_name: column_name,
+    }),
+  });
+  if (!response.ok) {
+    console.error("Error add column :", response.statusText);
+    alert("Something wrong happens. No column added");
+    return;
+  }
+  const data = await response.json();
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  } else {
+    window.location.reload();
+  }
+}
+
+
+async function onRemoveColumn() {
+
+  let column_name = prompt("Enter the name of the column to be removed :");
+  if (column_name === null) {
+    return;
+  }
+  column_name = column_name.trim();
+  if (!column_name) {
+    alert("column_name empty, cancel");
+    return;
+  }
+
+  const response = await fetch("/remove_column", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      session: session,
+      filename: filename,
+      column_name: column_name,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Error remove column :", response.statusText);
+    alert("Some wrong happens. No column removed");
+    return;
+  }
+
+  const data = await response.json();
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  } else {
+    window.location.reload();
+  }
+}
+
+
+async function editCell(td) {
+  const rowIndex = td.dataset.row;
+  const colName = td.dataset.col;
+  const oldValue = td.firstChild.innerText;
+  const newValue = prompt("Entrer the new " + colName + " for " + rowIndex + " :", oldValue);
+  if (newValue === null || newValue === oldValue) {
+    return;
+  }
+  try {
+    const response = await fetch("/update_cell", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        session: session,
+        row: rowIndex,
+        column: colName,
+        value: newValue,
+      }),
+    });
+    if (!response.ok) {
+      console.error("Error update_cell :", response.statusText);
+      alert("Something wrong happens. No value updated");
+      return;
+    }
+    const data = await response.json();
+    if (data.status === "ok") {
+      td.firstChild.innerText = data.value ?? newValue;
+    } else {
+      alert("Error: " + (data.message || "impossible to update"));
+    }
+  } catch (e) {
+    console.error("Error JS update_cell :", e);
+    alert("Network error, ");
+  }
+}
+
+
+async function onSave() {
+
+  let choosen_filename = prompt("Enter filename to save:", filename);
+  if (choosen_filename === null) {
+    return;
+  }
+  choosen_filename = choosen_filename.trim();
+  if (!choosen_filename) {
+    alert("Filename cannot be empty.");
+    return;
+  }
+  if (!choosen_filename.toLowerCase().endsWith(".csv")) {
+    choosen_filename += ".csv";
+  }
+  const payload = {
+    session: session,
+    filename: choosen_filename,
+  };
+
+  try {
+    const response = await fetch("/save_data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("Save error:", response.statusText);
+      alert("Error during save.");
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      alert(`Data saved successfully as: ${choosen_filename}`);
+    } else {
+      alert("Error: " + (data.message || "Unable to save file"));
+    }
+
+  } catch (error) {
+    console.error("Save exception:", error);
+    alert("Network error during save.");
+  }
+}
+
+    </script>
+</head>
+<body>
+    {{ table | safe }}
+
+
+<script>
+    startToObserve();
+</script>
+    <div id="cornerContextMenu" class="corner-context-menu">
+        <button onclick="onSave()">💾 Save as</button>
+        <button onclick="onExport()">📤 Export</button>
+        <button onclick="onAddMolecule()">➕🧪 Add molecule</button>
+        <button onclick="onRemoveMolecule()">➖️🧪 Remove molecule</button>
+        <button onclick="onAddColumn()">➕📊 Add column</button>
+        <button onclick="onRemoveColumn()">➖️📊 Remove column</button>
+    </div>
+</body>
+</html>
+
