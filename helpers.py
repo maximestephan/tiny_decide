@@ -76,6 +76,25 @@ PESTICIDE_DESCRIPTOR_FUNCS = {
 }
 HALOGEN_PATTERN = Chem.MolFromSmarts("[F,Cl,Br,I]")
 
+
+def compute_pesticide_descriptors_from_mol(mol: Chem.Mol) -> dict:
+    """Return a dict of descriptors for a given RDKit Mol."""
+    if mol is None:
+        return {name: None for name in PESTICIDE_DESCRIPTOR_FUNCS.keys()}
+
+    descs = {}
+    for name, func in PESTICIDE_DESCRIPTOR_FUNCS.items():
+        try:
+            value = func(mol)
+        except Exception:
+            value = None
+        descs[name] = value
+
+    # Example for a halogen flag
+    descs["HasHalogen"] = int(mol.HasSubstructMatch(HALOGEN_PATTERN))
+
+    return descs
+
 def count_halogens(mol: Chem.Mol) -> int:
     if HALOGEN_PATTERN is None or mol is None:
         return 0
@@ -94,11 +113,6 @@ def compute_pesticide_descriptors_from_mol(mol: Chem.Mol) -> dict:
             descs[name] = func(mol)
         except Exception:
             descs[name] = None
-
-    try:
-        descs["FormalCharge"] = mol.GetFormalCharge()
-    except Exception:
-        descs["FormalCharge"] = None
 
     try:
         descs["NumHalogens"] = count_halogens(mol)
@@ -120,7 +134,7 @@ def all_descriptors(mol):
 def chemistrify(input_file, output_file):
     with open(input_file, "r", encoding="utf-8") as fin, \
          open(output_file, "w", encoding="utf-8") as fout:
-        fout.write("id" + "\t" +  "MUN" + "\t" + "smiles" )
+        fout.write( "id" + "\t" + "name" + "\t"  + "smiles" )
         dummy_mol = Chem.MolFromSmiles("C")
         descs = compute_pesticide_descriptors_from_mol(dummy_mol)
         for k, v in descs.items():
@@ -131,17 +145,22 @@ def chemistrify(input_file, output_file):
             column = line.split("\t")
             name =  column[0]
             smiles = column[1]
-            mol = Chem.MolFromSmiles(smiles)
-            canonical_smiles = Chem.MolToSmiles(mol, canonical=True)
-            id = canonical_string_to_id(canonical_smiles)
-            fout.write(id + "\t" + name + "\t" +  smiles )
-            #logP =  round(Descriptors.MolLogP(mol),1)
-            descs = compute_pesticide_descriptors_from_mol(mol)
-            for k, v in descs.items():
-                fout.write("\t" + str(v))
-            fout.write("\n")
             
-#chemistrify("./data/pesticides.smiles","./data/pesticides_chemistry.csv")
+            try: 
+                mol = Chem.MolFromSmiles(smiles)
+                canonical_smiles = Chem.MolToSmiles(mol, canonical=True)
+                id = canonical_string_to_id(canonical_smiles)
+                fout.write(id + "\t" + name + "\t" +  smiles )
+                #logP =  round(Descriptors.MolLogP(mol),1)
+                descs = compute_pesticide_descriptors_from_mol(mol)
+                for k, v in descs.items():
+                    fout.write("\t" + str(v))
+                fout.write("\n")
+            except Exception as e:
+                print(e)
+                    
+            
+#chemistrify("./ignore/smiles.txt","./data/wikipedia.csv")
 
 def round_to_one_significant_decimal(x):
     if "e" in str(f"{x:.3g}"):

@@ -9,7 +9,7 @@ body {
     font-family: Arial;
     padding: 0px;
     margin: 0px;
-    font-size: 9pt;
+    font-size: 15pt;
     background-color: #F5F5F5;
     text-align: center;
 }
@@ -44,16 +44,31 @@ body {
         window.open(url, '_blank');
     }
 
+    async function openDataFolder() {
+    await fetch("/open-data-folder");
+}
+
+
+
     </script>
 </head>
 <body>
+    <br><br><br>
     <form onsubmit="handleFormSubmit(event)">
-    <label for="dataset">Choose a dataset:</label><br>
+    <label for="dataset">Choose a dataset</label><br>
     <select name="dataset" id="dataset" size="10" onclick="datasetChange()" >
         {{ list_string | safe }}
     </select><br>
     <input type="hidden" id="datasetname" name="datasetname" ><br>
     <input type="submit" value="Submit" />
+</form>
+<br><br><br>
+<button onclick="openDataFolder()">Open data folder</button>
+<br><br><br>
+<label for="file">or upload a csv file</label><br>
+ <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput">
+        <button type="submit">Import</button>
 </form>
 </body>
 </html>

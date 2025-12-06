@@ -193,6 +193,25 @@ table td:first-child {
 }
 
 
+.corner-context-menu .menu-checkbox {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+}
+
+.corner-context-menu .menu-checkbox:hover {
+  background: #f0f0f0;
+}
+
+.corner-context-menu .menu-checkbox input[type="checkbox"] {
+  margin-right: 6px;
+  transform: scale(1.1);
+  vertical-align: middle;
+}
         
     </style>
     
@@ -228,7 +247,7 @@ table td:first-child {
         xmlhttp.open("POST","/readrow/",true);
         xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         //let length = document.getElementById('numrow').innerHTML;
-        xmlhttp.send("session=" + session + "&index=" + index ); 
+        xmlhttp.send("uid=" + uid + "&index=" + index ); 
         //document.body.style.cursor = 'wait';
         
 }
@@ -278,7 +297,7 @@ document.addEventListener("keydown", function(e) {
 });
 
 
-const session =  "{{ uid }}";
+const uid =  "{{ uid }}";
 const filename = "{{ filename }}";
 
 async function onExport() {
@@ -290,7 +309,7 @@ async function onExport() {
         filename_input += ".csv";
     }
     const params = new URLSearchParams();
-    params.append("session", session);
+    params.append("uid", uid);
     params.append("filename", filename_input);
     const response = await fetch("/export_data", {
         method: "POST",
@@ -327,7 +346,7 @@ async function onAddMolecule() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      session: session,
+      uid: uid,
       filename: filename,
       smiles: smiles,
     }),
@@ -363,7 +382,7 @@ async function onRemoveMolecule() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      session: session,
+      uid: uid,
       filename: filename,
       id: id,
     }),
@@ -398,7 +417,7 @@ async function onAddColumn() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      session: session,
+      uid: uid,
       filename: filename,
       column_name: column_name,
     }),
@@ -435,7 +454,7 @@ async function onRemoveColumn() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      session: session,
+      uid: uid,
       filename: filename,
       column_name: column_name,
     }),
@@ -471,7 +490,7 @@ async function editCell(td) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        session: session,
+        uid: uid,
         row: rowIndex,
         column: colName,
         value: newValue,
@@ -510,7 +529,7 @@ async function onSave() {
     choosen_filename += ".csv";
   }
   const payload = {
-    session: session,
+    uid: uid,
     filename: choosen_filename,
   };
 
@@ -543,6 +562,16 @@ async function onSave() {
   }
 }
 
+async function saveSignificantSetting() {
+    const checked = (document.getElementById("significantToggle").checked);
+    await fetch("/set-significant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ significant: checked })
+    });
+    location.reload();
+}
+
     </script>
 </head>
 <body>
@@ -559,6 +588,10 @@ async function onSave() {
         <button onclick="onRemoveMolecule()">➖️🧪 Remove molecule</button>
         <button onclick="onAddColumn()">➕📊 Add column</button>
         <button onclick="onRemoveColumn()">➖️📊 Remove column</button>
+        <label class="menu-checkbox">
+            <input type="checkbox" {{ significant }} id="significantToggle" onchange="saveSignificantSetting()">
+            🔢 Only significant numbers
+        </label>
     </div>
 </body>
 </html>
