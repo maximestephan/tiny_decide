@@ -16,7 +16,7 @@ REM 1) Check Git installation
 REM -----------------------------------------
 echo [1/5] Checking Git...
 
-git --version >nul 2>&1
+git --version 2>&1 | findstr /i "version" >nul
 if %errorlevel% neq 0 (
     echo Git not found. Installing Git using winget...
     winget install --id Git.Git -e --source winget
@@ -26,7 +26,6 @@ if %errorlevel% neq 0 (
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH updates.)
     echo.
-    exit /b 1
 
 ) else (
     echo Git is installed:
@@ -50,7 +49,7 @@ if not exist "%MINICONDA_DIR%\Scripts\activate.bat" (
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH and base activation.)
     echo.
-    exit /b 1
+
 )
 
 echo Miniconda found at: %MINICONDA_DIR%
@@ -126,9 +125,6 @@ REM -----------------------------------------
 REM Start Flask and open browser
 REM -----------------------------------------
 echo Launching Flask server on http://127.0.0.1:8080 ...
-
-echo DEBUG: MINICONDA_DIR="%MINICONDA_DIR%"
-echo DEBUG: APP_DIR="%APP_DIR%"
 
 
 start "tiny_decide Flask" cmd /k "call %MINICONDA_DIR%\Scripts\activate.bat tinydecide && cd /d %APP_DIR% && python -m flask --app main.py run --debug --port 8080"
