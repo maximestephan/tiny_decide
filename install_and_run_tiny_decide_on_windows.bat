@@ -26,6 +26,7 @@ if %errorlevel% neq 0 (
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH updates.)
     echo.
+    exit /b 1
 
 ) else (
     echo Git is installed:
@@ -49,6 +50,7 @@ if not exist "%MINICONDA_DIR%\Scripts\activate.bat" (
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH and base activation.)
     echo.
+    exit /b 1
 )
 
 echo Miniconda found at: %MINICONDA_DIR%
@@ -92,10 +94,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Optional: ensure packages are updated
-echo Updating required packages (rdkit, flask, pandas, requests)...
-conda install -y rdkit flask pandas requests -c conda-forge
-echo.
+
 
 REM -----------------------------------------
 REM 5) Clone or update repository
@@ -128,16 +127,18 @@ REM Start Flask and open browser
 REM -----------------------------------------
 echo Launching Flask server on http://127.0.0.1:8080 ...
 
-start "tiny_decide Flask" cmd /k ^
-"call \"%MINICONDA_DIR%\Scripts\activate.bat\" tinydecide && cd /d \"%APP_DIR%\" && python -m flask --app main.py run --debug --port 8080"
+echo DEBUG: MINICONDA_DIR="%MINICONDA_DIR%"
+echo DEBUG: APP_DIR="%APP_DIR%"
+
+
+start "tiny_decide Flask" cmd /k "call %MINICONDA_DIR%\Scripts\activate.bat tinydecide && cd /d %APP_DIR% && python -m flask --app main.py run --debug --port 8080"
 
 echo Waiting before opening browser...
-timeout /t 5 /nobreak >nul
+timeout /t 15 /nobreak >nul
 
 start "" "http://127.0.0.1:8080"
 
 echo.
 echo INSTALLATION COMPLETE - Flask is running in a separate window.
 echo.
-pause
-exit /b 0
+
