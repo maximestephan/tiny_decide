@@ -30,7 +30,6 @@ th {
     top: 0; 
     z-index: 5;
     background-color :#e1e1e1;
-
     vertical-align: top;
     font: 12pt Arial;
     font-weight: 100;
@@ -40,16 +39,44 @@ th {
     border-right: 1px solid #A9A9A9;
 }
 
-
 .sortableHeader {
-    cursor: pointer;
- 
+    //position: relative;
+    cursor: pointer;  
+    white-space: nowrap;      
+    text-align: center; 
+}
+
+.sortableHeader.sorted {
+    padding-right: 25px;  /* only when sorted */
+}
+
+.sortableHeader.sorted.asc::after {
+    content: "▲";
+    position: absolute;
+    right: 4px;  
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.sortableHeader.sorted.desc::after {
+    content: "▼";
+    position: absolute;
+    right: 4px;  
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0.7;
+    pointer-events: none;
 }
 
 td
 {
     text-align: center;
-    padding: 0px 5px;
+    padding: 0px 0px;
+    margin: 0px 5px;
     font: 12pt Arial;
     min-width: 45px;
     max-width: 275px;
@@ -92,14 +119,14 @@ table td:first-child {
 
 .stickyHeaderMolecule {
     position: sticky;
-    left: 56px; 
+    left: 54.5px; 
     top: 0px;
     z-index: 20;
 }
 
 .stickyHeaderName {
     position: sticky;
-    left: 258px; 
+    left: 255.5px; 
     top: 0px;
     z-index: 20;
 }
@@ -116,7 +143,7 @@ table td:first-child {
 
 .stickyMolecule {
     position: sticky;
-    left: 56px; 
+    left: 54.5px; 
     z-index: 4;
     background-color: #F5F5F5;
     border-left: 0;
@@ -124,7 +151,7 @@ table td:first-child {
 
 .stickyName {
     position: sticky;
-    left: 258px; 
+    left: 255.5px; 
     z-index: 4;
     background-color: #F5F5F5;
     border-left: 0;
@@ -217,25 +244,14 @@ table td:first-child {
     
     <script type="text/javascript" charset="utf-8">
        
-       function readRowTableAjax(index) {
+       function readRowTableAjax(index, row_number) {
         //console.log('Loading row ' + index);
         let xmlhttp= window.XMLHttpRequest ?        new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
         xmlhttp.onreadystatechange = function() {
             if (this.readyState === 4){
                 if (  this.status === 200){
-                    //document.body.style.cursor = 'default';
-                    // update tr from response 
-                    //console.log('Row ' + index + "getted");
-                    //document.getElementById(index).parentElement.innerHTML = this.responseText;
-                    //document.getElementById(index).parentElement.insertAdjacentHTML("afterbegin",this.responseText);
-                    document.getElementById(index).insertAdjacentHTML("afterbegin",this.responseText);
-
-
-                    }
-                /*else if (  this.status === 204){
-                    document.body.style.cursor = 'default';
-                    submitFormAjax();
-                    }*/
+                  document.getElementById(index).insertAdjacentHTML("afterbegin",this.responseText);
+                }
                 else
                 {
                     template = document.createElement('template');
@@ -246,9 +262,8 @@ table td:first-child {
         }
         xmlhttp.open("POST","/readrow/",true);
         xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        //let length = document.getElementById('numrow').innerHTML;
-        xmlhttp.send("uid=" + uid + "&index=" + index ); 
-        //document.body.style.cursor = 'wait';
+        xmlhttp.send("session_uid=" + session_uid + "&index=" + index + "&row_number=" + row_number); 
+
         
 }
 
@@ -257,7 +272,8 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach(({ target, isIntersecting }) => {
 	if ( isIntersecting ) {
 		var index = target.getAttribute("id"); 
-        readRowTableAjax(index);
+    var row_number = target.getAttribute("row_number"); 
+    readRowTableAjax(index, row_number);
 		observer.unobserve(target);
 	}
   });
@@ -297,7 +313,7 @@ document.addEventListener("keydown", function(e) {
 });
 
 
-const uid =  "{{ uid }}";
+const session_uid =  "{{ session_uid }}";
 const filename = "{{ filename }}";
 
 async function onExport() {
@@ -309,7 +325,7 @@ async function onExport() {
         filename_input += ".csv";
     }
     const params = new URLSearchParams();
-    params.append("uid", uid);
+    params.append("session_uid", session_uid);
     params.append("filename", filename_input);
     const response = await fetch("/export_data", {
         method: "POST",
@@ -346,7 +362,7 @@ async function onAddMolecule() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      uid: uid,
+      session_uid: session_uid,
       filename: filename,
       smiles: smiles,
     }),
@@ -382,7 +398,7 @@ async function onRemoveMolecule() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      uid: uid,
+      session_uid: session_uid,
       filename: filename,
       id: id,
     }),
@@ -417,7 +433,7 @@ async function onAddColumn() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      uid: uid,
+      session_uid: session_uid,
       filename: filename,
       column_name: column_name,
     }),
@@ -454,7 +470,7 @@ async function onRemoveColumn() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      uid: uid,
+      session_uid: session_uid,
       filename: filename,
       column_name: column_name,
     }),
@@ -490,7 +506,7 @@ async function editCell(td) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        uid: uid,
+        session_uid: session_uid,
         row: rowIndex,
         column: colName,
         value: newValue,
@@ -529,7 +545,7 @@ async function onSave() {
     choosen_filename += ".csv";
   }
   const payload = {
-    uid: uid,
+    session_uid: session_uid,
     filename: choosen_filename,
   };
 
@@ -571,6 +587,36 @@ async function saveSignificantSetting() {
     });
     location.reload();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const headers = document.querySelectorAll("th.sortableHeader");
+
+    headers.forEach((header) => {
+        header.addEventListener("click", () => {
+          console.log("click")
+            const sortKey = header.dataset.sortKey;
+            if (!sortKey) return;
+
+            // This keeps ALL existing query parameters
+            const url = new URL(window.location.href);
+
+            const currentSort = url.searchParams.get("sort");
+            const currentOrder = url.searchParams.get("order") || "asc";
+
+            let newOrder = "asc";
+            if (currentSort === sortKey && currentOrder === "asc") {
+                newOrder = "desc";
+            }
+
+            // Only these two are added/updated
+            url.searchParams.set("sort", sortKey);
+            url.searchParams.set("order", newOrder);
+
+            window.location.href = url.toString();
+        });
+    });
+});
+
 
     </script>
 </head>

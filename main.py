@@ -52,19 +52,19 @@ def upload_file():
 @app.route("/add_molecule", methods=['POST'])
 def add_molecule():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     filename = str(data.get("filename"))
     smiles = str(data.get("smiles")).strip()
     if not smiles:
         return jsonify({"error": "SMILES empty"}), 400
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
     new_row = {col: None for col in df.columns}
     if "smiles" in df.columns:
         new_row["smiles"] = smiles
     new_row["index"] = -1
-    new_row["Molecule"] = mol = Chem.MolFromSmiles(smiles, sanitize=True)
+    new_row["molecule"] = mol = Chem.MolFromSmiles(smiles, sanitize=True)
     new_row["id"] = helpers.smiles_to_id(smiles)
     new_row["name"] = f"added the {datetime.now().strftime('%d.%m.%Y')}"
     
@@ -77,67 +77,67 @@ def add_molecule():
     df = df.fillna('')
     df = df.sort_index().reset_index(drop=True)
     df["index"] = df["index"] + 1
-    globals()[uid] = df 
-    redirect_url = url_for("table", uid=uid, filename=filename)
+    globals()[session_uid] = df 
+    redirect_url = url_for("table", session_uid=session_uid, filename=filename)
     return jsonify({"status": "ok", "redirect_url": redirect_url})
 
 @app.route("/remove_molecule", methods=['POST'])
 def remove_molecule():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     filename = str(data.get("filename"))
     id = str(data.get("id")).strip()
     if not id:
         return jsonify({"error": "id empty"}), 400
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
     df = df[df["id"] != id]
     df = df.sort_index().reset_index(drop=True)
     df["index"] = df.index
-    globals()[uid] = df 
-    redirect_url = url_for("table", uid=uid, filename=filename)
+    globals()[session_uid] = df 
+    redirect_url = url_for("table", session_uid=session_uid, filename=filename)
     return jsonify({"status": "ok", "redirect_url": redirect_url})
 
 
 @app.route("/add_column", methods=['POST'])
 def add_column():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     filename = str(data.get("filename"))
     column_name = str(data.get("column_name")).strip()
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
     df[column_name] = ""
-    globals()[uid] = df 
-    redirect_url = url_for("table", uid=uid, filename=filename)
+    globals()[session_uid] = df 
+    redirect_url = url_for("table", session_uid=session_uid, filename=filename)
     return jsonify({"status": "ok", "redirect_url": redirect_url})
 
 @app.route("/remove_column", methods=['POST'])
 def remove_column():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     filename = str(data.get("filename"))
     column_name = str(data.get("column_name")).strip()
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
     df = df.drop(columns=[column_name])
-    globals()[uid] = df 
-    redirect_url = url_for("table", uid=uid, filename=filename)
+    globals()[session_uid] = df 
+    redirect_url = url_for("table", session_uid=session_uid, filename=filename)
     return jsonify({"status": "ok", "redirect_url": redirect_url})
 
 @app.route("/update_cell", methods=["POST"])
 def update_cell():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     row = str(data.get("row"))
     col = str(data.get("column"))
     value = str(data.get("value"))
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
     if col not in df.columns:
         return jsonify({"status": "error", "message": "row or column invalid"}), 400
     try:
@@ -151,7 +151,7 @@ def update_cell():
     except Exception as e:
         app.logger.info("expection when trying to put value in dataframe" , e)
         df.loc[df["id"] == row, col] = value
-    globals()[uid] = df
+    globals()[session_uid] = df
     return jsonify({
         "status": "ok",
         "value": value,
@@ -160,20 +160,20 @@ def update_cell():
 @app.route("/save_data", methods=["POST"])
 def save_data():
     data = request.get_json()
-    uid = str(data.get("uid"))
+    session_uid = str(data.get("session_uid"))
     filename = data.get("filename")
     if not filename:
         return jsonify({"status": "error", "message": "Filename missing"}), 400
 
     filename = secure_filename(filename)
-    df = globals()[uid]
+    df = globals()[session_uid]
     if df is None:
-        return jsonify({"error": "unknow uid"}), 400
+        return jsonify({"error": "unknow session_uid"}), 400
 
     csv_path = "data/" + filename
     try:
         #df2 = df.drop(columns=["index"])
-        df2 = df.drop(columns=["index","Molecule"])
+        df2 = df.drop(columns=["index","molecule"])
         df2.to_csv(csv_path, index=False, sep="\t")
     except Exception as exc:
         app.logger.info("Error saving CSV:", exc)
@@ -190,10 +190,10 @@ def save_data():
 
 @app.route("/export_data/", methods = ['POST'])
 def export_data():
-    uid = str(request.form.get('uid'))  
+    session_uid = str(request.form.get('session_uid'))  
     filename = str(request.form.get('filename'))
-    df = globals()[uid]
-    df2 = df.drop(columns=["index","Molecule"])
+    df = globals()[session_uid]
+    df2 = df.drop(columns=["index","molecule"])
     buffer = StringIO()
     df2.to_csv(buffer, index=False)
     csv_data = buffer.getvalue()
@@ -233,14 +233,14 @@ def open_data_folder():
 @app.route('/load/<filename>')
 def load(filename):
     csv_path = "data/" + filename
-    uid = uuid.uuid4().hex
+    session_uid = uuid.uuid4().hex
     if csv_path.endswith('.csv'):
         app.logger.info('Loading csv')
         df = pd.read_csv(csv_path, sep="\t", nrows= 99999)
-        #PandasTools.AddMoleculeColumnToFrame(df, 'SMILES', 'Molecule')
-        df['Molecule'] = df['smiles'].apply(lambda x: Chem.MolFromSmiles(x, sanitize=True) )
-        # if Molecule is None then Molecule become empty molecule
-        df['Molecule'] = df['Molecule'].apply(lambda Molecule: Molecule if Molecule else Chem.MolFromSmiles('') )
+        #PandasTools.AddmoleculeColumnToFrame(df, 'SMILES', 'molecule')
+        df['molecule'] = df['smiles'].apply(lambda x: Chem.MolFromSmiles(x, sanitize=True) )
+        # if molecule is None then molecule become empty molecule
+        df['molecule'] = df['molecule'].apply(lambda molecule: molecule if molecule else Chem.MolFromSmiles('') )
     elif csv_path.endswith('.sdf'):
         app.logger.info('Loading sdf')
         mol_supplier = Chem.MultithreadedSDMolSupplier(csv_path, numWriterThreads=5)
@@ -249,71 +249,85 @@ def load(filename):
             if mol is not None:
                 props = mol.GetPropsAsDict()
                 props["Title"] = mol.GetProp("_Name")
-                props["Molecule"] = mol
+                props["molecule"] = mol
                 molecules.append(props)
         df = pd.DataFrame(molecules)
 
     #if("Name" not in df.columns):
-    #    df['Name'] = df['Molecule'].apply(lambda x: Chem.InchiToInchiKey(Chem.MolToInchi(x, options='-KET -15T')))
+    #    df['Name'] = df['molecule'].apply(lambda x: Chem.InchiToInchiKey(Chem.MolToInchi(x, options='-KET -15T')))
 
-    df.insert(0, 'Molecule', df.pop('Molecule'))
-    
+    df.insert(0, 'molecule', df.pop('molecule'))
     df.reset_index(inplace=True)
-    globals()[uid] = df 
-    return redirect(url_for("table", uid=uid, filename=filename))
+    globals()[session_uid] = df 
+    return redirect(url_for("table", session_uid=session_uid, filename=filename))
 
 
 
 @app.route('/table')
 def table():
     use_significant = session.get("use_significant", True)
-    uid = request.args.get("uid")
+    session_uid = request.args.get("session_uid")
     filename = request.args.get("filename")
-    df = globals().get(uid)
+    sort_key = request.args.get("sort")
+    sort_order = request.args.get("order", "asc")
+
+    df = globals().get(session_uid)
     if df is None:
         return redirect(url_for("load",  filename=filename))
+    
+    if sort_key is not None and sort_key in df.columns:
+        ascending = sort_order != "desc"
+        df = df.sort_values(by=sort_key, ascending=ascending)
+        #df = df.reset_index(drop=True).sort_index()
+        #df = df.drop(columns=["index"])
+        #df = df.sort_index().reset_index(drop=True)
+        df["index_order"] = df.reset_index(drop=True).index
+        print(df.head(5))
     table = "<table class='maintable'>"
-    for index, row in df.iterrows():
-        if (index == 0 ):
+    #for index, row in df.iterrows():
+    for row_number, (index, row) in enumerate(df.iterrows()):
+        if (row_number == 0 ):
             table += "<tr>"
             for column in df.columns:
                 if column == 'index': 
                     table += "<th  class='stickyHeaderIndex' onclick='toggleContextMenu(event)' title='click to open menu options'>•••</th>"        
-                elif column == 'Molecule':
-                    table += "<th  class='stickyHeaderMolecule'>Molecule</th>"     
+                elif column == 'molecule':
+                    table += "<th  class='stickyHeaderMolecule'>molecule</th>"     
                 elif column == 'id':
-                    table += "<th  class='stickyHeaderName'>id</th>"  
+                    sortableHeader = f"sortableHeader sorted {sort_order}"  if column == sort_key else "sortableHeader"        
+                    table += "<th  class='stickyHeaderName " + sortableHeader +"' data-sort-key='"+ str(column) + "'>id</th>"  
                 else:
-                    class_sticky = ""
-                    column_name = str(column).replace('_',' ').replace('*',' ').replace('.','<br>')
-                    table += "<th name='"+ str(column) + "' class='sortableHeader' onclick='sortHeader(this)'  title='Click to sort by this column'>" + column_name + "</th>"        
+                    sortableHeader = f"sortableHeader sorted {sort_order}"  if column == sort_key else "sortableHeader"        
+                    column_name = str(column).replace('_',' ').replace('*',' ').replace('.','<br>')    
+                    table += "<th name='"+ str(column) + "' class='" + sortableHeader +"' data-sort-key='"+ str(column) + "'  title='Click to sort by this column'>" + column_name + "</th>"        
             table += "</tr>"    
-        table += f"<tr id='{str(index)}' class='observable' ></tr>"
+        table += f"<tr id='{str(index )}' row_number='{str(row_number+1 )}' class='observable' ></tr>"
     table += "</table>"
     
     check_significant = "checked" if (use_significant) else ""
-    return render_template('main.html', table=table, uid = uid, filename= filename , significant = check_significant)
+    return render_template('main.html', table=table, session_uid = session_uid, filename= filename , significant = check_significant)
     
 
 
 @app.route("/readrow/" , methods = ['POST'])
 def readrow():
-    uid = str(request.form.get('uid'))  
+    session_uid = str(request.form.get('session_uid'))  
     index = int(str(request.form.get('index')))
+    row_number = (str(request.form.get('row_number')))
     try:
-        df = globals()[uid]
+        df = globals()[session_uid]
         row = df.iloc[index] #.query('index == ' + str(index) )
-        return renderRow(row, df.columns)
+        return renderRow(row, df.columns, row_number)
     except:
         return Response("", status=204)
     
 
 
-def renderRow(row, columns):
+def renderRow(row, columns, row_number):
     table = "<tr>"
-    use_significant = session.get("use_significant", False)
+    use_significant = session.get("use_significant", True)
     for column in columns:
-        if ( column == "Molecule"):
+        if ( column == "molecule"):
             try:
                 drawer = rdMolDraw2D.MolDraw2DCairo(200, 100)
                 #drawer.drawOptions().useBWAtomPalette()
@@ -321,7 +335,7 @@ def renderRow(row, columns):
                 drawer.drawOptions().minFontSize = 9
                 color=(245/255.0,245/255.0, 245/255.0, 245/255.0)
                 drawer.drawOptions().setBackgroundColour(color)
-                rdMolDraw2D.PrepareAndDrawMolecule(drawer, row['Molecule'])                
+                rdMolDraw2D.PrepareAndDrawMolecule(drawer, row['molecule'])                
                 table += f"""<td class='stickyMolecule'><div style=' height: 100px; width: 200px;'><img src='data:image/png;base64, {base64.b64encode(drawer.GetDrawingText()).decode('utf8')}' /></div></td>"""
             except Exception as ex :
                 app.logger.info("An exception occurred " + str(ex))
@@ -329,7 +343,7 @@ def renderRow(row, columns):
         elif ( column == "smiles"):
             table += "<td class='smiles' >" + str(row[column]) + "</td>"
         elif ( column == "index"):
-            table += "<td class='stickyIndex' >" + str(row[column]+1) + "</td>"
+            table += "<td class='stickyIndex' >" + row_number + "</td>"
         elif ( column == "id"):
             table += "<td class='stickyName'>" + str(row[column]) + "</td>"
         

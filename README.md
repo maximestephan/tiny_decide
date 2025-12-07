@@ -1,30 +1,24 @@
 # Tiny_decide
 a web visualizer to display chemical compounds and associated data
 
+You can use the script ```install_and_run_tiny_decide.bat```on Windows to install and run it
+
+Or you can do manually something like :
+
 1. Clone git
 
 ```git clone https://github.com/maximestephan/tiny_decide.git```
 
+if you just want to update with the latest verison :
+```git pull```
+
 2. Create environment
 
-on Windows:
-    ```py -m venv tiny_decideenv```
-
-on Linux/macOS:
     ```python3 -m venv tiny_decideenv```
-
 3. Activate environment
-
-on Windows:
-    ```.\tiny_decideenv\Scripts\activate```
     
-on Linux/macOS: 
-    ```./tiny_decideenv/bin/activate```
+    ```source tiny_decideenv/bin/activate```
     
-( if you get a permission deny, execute this command 
-    ```chmod u+x ./tiny_decideenv/bin/activate```
-)
-
 4. Install requirements
 
 ```pip install -r requirements.txt```
@@ -37,7 +31,4 @@ on Linux/macOS:
 
 open a browser on http://127.0.0.1:8080
 
-
-
-
-Note: the molecules are the one present on Wikipedia and put it together thanks to https://wikipedia.cheminfo.org/
+Note : The identifier use in this solution is uniquely generated, and if it were ever to resemble one from a Swiss agrochemical company, the similarity would be an extraordinary and purely coincidental anomaly.

@@ -1,4 +1,4 @@
-Molecule	id	name	smiles	MolWt	CalcLogP	TPSA	NumHAcceptors	NumHDonors	NumRotatableBonds	FractionCSP3	NumValenceElectrons	NumHeavyAtoms	RingCount	NumAromaticRings	NumAliphaticRings	NumHeteroatoms	NumHalogens
+molecule	id	name	smiles	MolWt	CalcLogP	TPSA	NumHAcceptors	NumHDonors	NumRotatableBonds	FractionCSP3	NumValenceElectrons	NumHeavyAtoms	RingCount	NumAromaticRings	NumAliphaticRings	NumHeteroatoms	NumHalogens
 <rdkit.Chem.rdchem.Mol object at 0x135a5e650>	MULG460723	Bombykol	OCCCCCCCCC\C=C\C=C/CCC	238.415	5.012000000000005	20.23	1	1	12	0.75	100	17	0	0	0	1	0
 <rdkit.Chem.rdchem.Mol object at 0x135a5e570>	MUSY728399	Tetramethrin	O=C1\C3=C(/C(=O)N1COC(=O)C2C(\C=C(/C)C)C2(C)C)CCCC3	331.4120000000002	2.964900000000001	63.68	4	0	4	0.631578947368421	130	24	3	0	3	5	0
 <rdkit.Chem.rdchem.Mol object at 0x135a5e6c0>	MUMX974947	Ethoxyquin	O(c2ccc1c(\C(=C/C(N1)(C)C)C)c2)CC	217.312	3.692700000000003	21.26	2	1	2	0.4285714285714285	86	16	2	1	1	2	0
