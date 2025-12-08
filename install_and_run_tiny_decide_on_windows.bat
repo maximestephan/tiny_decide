@@ -17,22 +17,19 @@ REM -----------------------------------------
 echo [1/5] Checking Git...
 
 git --version >nul 2>&1
-if %errorlevel% neq 0 (
+if %errorlevel%==0 (
+    echo Git is installed:
+    git --version
+    echo.
+) else (
     echo Git not found. Installing Git using winget...
     winget install --id Git.Git -e --source winget
-
-
     echo.
     echo Git installation completed.
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH updates.)
     echo.
-    pause
     goto :end
-) else (
-    echo Git is installed:
-    git --version
-    echo.
 )
 
 REM -----------------------------------------
@@ -49,14 +46,6 @@ if not exist "%MINICONDA_DIR%\Scripts\activate.bat" (
 "%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
 "%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 "%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/msys2
-
-    echo.
-    echo Miniconda installation completed.
-    echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
-    echo (This is necessary for PATH and base activation.)
-    echo.
-    pause
-    goto :end
 
 )
 
@@ -144,6 +133,4 @@ echo.
 
 
 :END
-pause
 endlocal
-exit /b 0
