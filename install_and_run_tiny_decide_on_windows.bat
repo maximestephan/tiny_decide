@@ -19,12 +19,6 @@ echo [1/5] Checking Git...
 git --version >nul 2>&1
 if %errorlevel% neq 0 (
     winget install --id Git.Git -e --source winget
-    echo.
-    echo Git installation completed.
-    echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
-    echo (This is necessary for PATH updates.)
-    echo.
-    goto :end
 )
 
 REM -----------------------------------------
@@ -106,21 +100,33 @@ if not exist "%APP_DIR%" (
     git pull
 )
 
+if not exist "%APP_DIR%\.git" (
+        echo Git source not here
+        echo Please retry by restarting the script.
+        pause
+        goto :end
+
+)
+
 cd /d "%APP_DIR%"
 echo App directory ready.
 echo.
+
+
 
 REM -----------------------------------------
 REM Start Flask and open browser
 REM -----------------------------------------
 echo Launching Flask server on http://127.0.0.1:8080 ...
 
-start "tiny_decide Flask" cmd /k "call %MINICONDA_DIR%\Scripts\activate.bat tinydecide && cd /d %APP_DIR% && python -m flask --app main.py run --debug --port 8080"
-
-echo Waiting before opening browser...
-timeout /t 15 /nobreak >nul
-
+REM echo Waiting before opening browser...
+REM timeout /t 15 /nobreak >nul
 start "" "http://127.0.0.1:8080"
+
+REM start "tiny_decide Flask" cmd /k "call %MINICONDA_DIR%\Scripts\activate.bat tinydecide && cd /d %APP_DIR% && python -m flask --app main.py run --debug --port 8080"
+python -m flask --app main.py run --debug --port 8080
+
+
 
 echo.
 echo INSTALLATION COMPLETE - Flask is running in a separate window.
