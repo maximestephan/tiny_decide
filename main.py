@@ -278,11 +278,6 @@ def table():
     if sort_key is not None and sort_key in df.columns:
         ascending = sort_order != "desc"
         df = df.sort_values(by=sort_key, ascending=ascending)
-        #df = df.reset_index(drop=True).sort_index()
-        #df = df.drop(columns=["index"])
-        #df = df.sort_index().reset_index(drop=True)
-        df["index_order"] = df.reset_index(drop=True).index
-        print(df.head(5))
     table = "<table class='maintable'>"
     #for index, row in df.iterrows():
     for row_number, (index, row) in enumerate(df.iterrows()):
