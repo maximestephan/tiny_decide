@@ -17,12 +17,7 @@ REM -----------------------------------------
 echo [1/5] Checking Git...
 
 git --version >nul 2>&1
-if %errorlevel%==0 (
-    echo Git is installed:
-    git --version
-    echo.
-) else (
-    echo Git not found. Installing Git using winget...
+if %errorlevel% neq 0 (
     winget install --id Git.Git -e --source winget
     echo.
     echo Git installation completed.
