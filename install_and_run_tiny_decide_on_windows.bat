@@ -16,17 +16,19 @@ REM 1) Check Git installation
 REM -----------------------------------------
 echo [1/5] Checking Git...
 
-git --version 2>&1 | findstr /i "version" >nul
+git --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Git not found. Installing Git using winget...
     winget install --id Git.Git -e --source winget
+
 
     echo.
     echo Git installation completed.
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH updates.)
     echo.
-
+    pause
+    goto :end
 ) else (
     echo Git is installed:
     git --version
@@ -44,11 +46,17 @@ if not exist "%MINICONDA_DIR%\Scripts\activate.bat" (
 
     winget install --id Anaconda.Miniconda3 -e --source winget
 
+"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/msys2
+
     echo.
     echo Miniconda installation completed.
     echo PLEASE CLOSE THIS WINDOW COMPLETELY AND RUN THE SCRIPT AGAIN.
     echo (This is necessary for PATH and base activation.)
     echo.
+    pause
+    goto :end
 
 )
 
@@ -76,9 +84,6 @@ echo [4/5] Checking conda environment tinydecide...
 conda env list | findstr /b /c:"tinydecide" >nul 2>&1
 if errorlevel 1 (
     echo Environment "tinydecide" not found. Creating it now...
-"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
-"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-"%MINICONDA_DIR%\Scripts\conda.exe" tos accept --override-channels --channel https://repo.anaconda.com/pkgs/msys2
 
     conda create -y -n tinydecide python=3.11 rdkit flask pandas requests -c conda-forge
 ) else (
@@ -90,7 +95,6 @@ call "%MINICONDA_DIR%\Scripts\activate.bat" tinydecide
 if errorlevel 1 (
     echo ERROR: Failed to activate tinydecide.
     pause
-    exit /b 1
 )
 
 
@@ -110,7 +114,8 @@ if not exist "%APP_DIR%" (
         echo ERROR: Folder exists but is NOT a git repository.
         echo Please delete or rename "%APP_DIR%" and retry.
         pause
-        exit /b 1
+        goto :end
+
     )
     echo Repository exists. Pulling latest updates...
     cd /d "%APP_DIR%"
@@ -126,7 +131,6 @@ REM Start Flask and open browser
 REM -----------------------------------------
 echo Launching Flask server on http://127.0.0.1:8080 ...
 
-
 start "tiny_decide Flask" cmd /k "call %MINICONDA_DIR%\Scripts\activate.bat tinydecide && cd /d %APP_DIR% && python -m flask --app main.py run --debug --port 8080"
 
 echo Waiting before opening browser...
@@ -138,3 +142,8 @@ echo.
 echo INSTALLATION COMPLETE - Flask is running in a separate window.
 echo.
 
+
+:END
+pause
+endlocal
+exit /b 0
