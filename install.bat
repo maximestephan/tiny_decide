@@ -3,6 +3,8 @@ setlocal
 
 
 winget install --id Git.Git -e --source winget
+REM refresh path
+for /f "tokens=2*" %%a in ('reg query HKLM\System\CurrentControlSet\Control\Session\Manager\Environment /v Path') do set "PATH=%%b;%PATH%"
 git clone https://github.com/maximestephan/tiny_decide.git "%USERPROFILE%\tiny_decide"
 
 winget install --id Anaconda.Miniconda3 -e --source winget
@@ -18,3 +20,5 @@ if errorlevel 1 (
 )
 pause
 
+start "" "%USERPROFILE%\tiny_decide\run.bat"
+exit
