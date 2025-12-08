@@ -3,7 +3,6 @@ setlocal
 
 
 winget install --id Git.Git -e --source winget
-git clone https://github.com/maximestephan/tiny_decide.git "%USERPROFILE%\tiny_decide"
 
 winget install --id Anaconda.Miniconda3 -e --source winget
 "%USERPROFILE%\miniconda3\Scripts\conda.exe"  tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
@@ -18,4 +17,3 @@ if errorlevel 1 (
 )
 
 start "" cmd /c "git clone https://github.com/maximestephan/tiny_decide.git "%USERPROFILE%\tiny_decide" && "%USERPROFILE%\tiny_decide\run.bat""
-exit
