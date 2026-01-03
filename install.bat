@@ -16,4 +16,3 @@ if errorlevel 1 (
     echo Environment tinydecide already exists.
 )
 
-start "" cmd /k "git clone https://github.com/maximestephan/tiny_decide.git "%USERPROFILE%\tiny_decide" && "%USERPROFILE%\tiny_decide\run.bat""
