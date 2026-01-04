@@ -31,4 +31,3 @@ if you just want to update with the latest verison :
 
 open a browser on http://127.0.0.1:8080
 
-Note : The identifier use in this solution is uniquely generated, and if it were ever to resemble one from a Swiss agrochemical company, the similarity would be an extraordinary and purely coincidental anomaly.
