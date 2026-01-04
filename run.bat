@@ -1,3 +1,4 @@
+@echo off
 setlocal
 
 REM Target directory
