@@ -1,0 +1,6 @@
+tiny_decideenv/
+.flaskenv
+__pycache__/
+todo.txt
+ignore/
+.DS_Store
