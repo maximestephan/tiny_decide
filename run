@@ -1,4 +1,4 @@
 git pull
 source ~/tiny_decideenv/bin/activate
 xdg-open http://127.0.0.1:8080 >/dev/null 2>&1 &
-flask --app main.py run --debug -p 8080 &
+flask --app main.py run --debug -p 8080 
